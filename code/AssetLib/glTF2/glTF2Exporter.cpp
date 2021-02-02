@@ -1228,6 +1228,12 @@ unsigned int glTF2Exporter::ExportNode(const aiNode* n, Ref<Node>& parent)
     node->parent = parent;
     node->name = name;
 
+    if (n->mMetaData != nullptr)
+    {
+        node->extras = *n->mMetaData;
+        node->extras.isPresent = true;
+    }
+
     if (!n->mTransformation.IsIdentity()) {
 		if (mScene->mNumAnimations > 0) {
 			aiQuaternion quaternion;

@@ -107,6 +107,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#include <assimp/metadata.h>
 #include <assimp/StringUtils.h>
 
 #include "AssetLib/glTF/glTFCommon.h"
@@ -878,6 +879,8 @@ struct Node : public Object {
 
     CustomExtension extensions;
 
+    Nullable<aiMetadata> extras;
+    
     Node() {}
     void Read(Value &obj, Asset &r);
 };

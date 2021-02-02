@@ -569,6 +569,56 @@ namespace glTF2 {
         }
     }
 
+    inline void WriteExtras(Value& obj, aiMetadata& n, AssetWriter& w)
+    {
+        for (unsigned int i = 0; i < n.mNumProperties; ++i)
+        {
+            void* data = n.mValues[i].mData;
+            const aiString& key = n.mKeys[i];
+            Value val;
+            switch (n.mValues[i].mType)
+            {
+            case AI_BOOL:
+                MakeValue(val, *static_cast<bool *>(data), w.mAl);
+                break;
+            case AI_INT32:
+                MakeValue(val, *static_cast<int32_t *>(data), w.mAl);
+                break;
+            case AI_UINT64:
+                MakeValue(val, *static_cast<uint64_t *>(data), w.mAl);
+                break;
+            case AI_FLOAT:
+                MakeValue(val, *static_cast<float *>(data), w.mAl);
+                break;
+            case AI_DOUBLE:
+                MakeValue(val, *static_cast<double *>(data), w.mAl);
+                break;
+            case AI_AISTRING:
+            {
+                const aiString* str = static_cast<aiString *>(data);
+                val.SetString(str->C_Str(), w.mAl);
+                break;
+            }
+            case AI_AIVECTOR3D:
+            {
+                const aiVector3D& vecData = *static_cast<aiVector3D *>(data);
+                glTF2::vec3 vec;
+                vec[0] = vecData.x;
+                vec[1] = vecData.y;
+                vec[2] = vecData.z;
+                MakeValue(val, vec, w.mAl);
+                break;
+            }
+            case AI_AIMETADATA:
+                val.SetObject();
+                WriteExtras(val, *static_cast<aiMetadata *>(data), w);
+                break;
+            }
+
+            obj.AddMember(StringRef(key.C_Str()), val, w.mAl);
+        }
+    }
+
     inline void Write(Value& obj, Node& n, AssetWriter& w)
     {
 
@@ -605,6 +655,15 @@ namespace glTF2 {
 
         if (!n.jointName.empty()) {
           obj.AddMember("jointName", n.jointName, w.mAl);
+        }
+
+        if (n.extras.isPresent) {
+            Value extras;
+            extras.SetObject();
+
+            WriteExtras(extras, n.extras.value, w);
+
+            obj.AddMember("extras", extras, w.mAl);
         }
     }
 
