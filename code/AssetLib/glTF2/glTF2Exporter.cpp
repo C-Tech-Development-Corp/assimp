@@ -1290,17 +1290,24 @@ void glTF2Exporter::ExportMetadata()
     AssetMetadata& asset = mAsset->asset;
     asset.version = "2.0";
 
-    char buffer[256];
-    ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
-        aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+    if (mScene->mMetaData != nullptr) {
+        // Generator
+        aiString generator_str;
+        if (!mScene->mMetaData->Get(AI_METADATA_SOURCE_GENERATOR, generator_str)) {
+            char buffer[256];
+            ai_snprintf(buffer, 256, "Open Asset Import Library (assimp v%d.%d.%x)",
+                aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+            generator_str = buffer;
+        }
 
-    asset.generator = buffer;
+        asset.generator = generator_str.C_Str();
 
-    // Copyright
-	aiString copyright_str;
-	if (mScene->mMetaData != nullptr && mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
-        asset.copyright = copyright_str.C_Str();
-	}
+        // Copyright
+        aiString copyright_str;
+	    if (mScene->mMetaData->Get(AI_METADATA_SOURCE_COPYRIGHT, copyright_str)) {
+            asset.copyright = copyright_str.C_Str();
+	    }
+	}   
 }
 
 inline Ref<Accessor> GetSamplerInputRef(Asset& asset, std::string& animId, Ref<Buffer>& buffer, std::vector<float>& times)
