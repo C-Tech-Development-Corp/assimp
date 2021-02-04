@@ -1199,6 +1199,12 @@ unsigned int glTF2Exporter::ExportNodeHierarchy(const aiNode* n)
 
     node->name = n->mName.C_Str();
 
+    if (n->mMetaData != nullptr)
+    {
+        node->extras = *n->mMetaData;
+        node->extras.isPresent = true;
+    }
+
     if (!n->mTransformation.IsIdentity()) {
         node->matrix.isPresent = true;
         CopyValue(n->mTransformation, node->matrix.value);
